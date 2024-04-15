@@ -1,0 +1,115 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()"))
+  email                  String                  @unique
+  passwordHash           String
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  role                   UserRole
+  subscriptions          Subscription[]
+  apiKeys                APIKey[]
+  userModuleInteractions UserModuleInteraction[]
+  userAnalytics          UserAnalytics[]
+  FeatureUsageRecord     FeatureUsageRecord[]
+}
+
+model Subscription {
+  id         String           @id @default(dbgenerated("gen_random_uuid()"))
+  userId     String
+  user       User             @relation(fields: [userId], references: [id])
+  createdAt  DateTime         @default(now())
+  validUntil DateTime
+  type       SubscriptionType
+}
+
+model APIKey {
+  id         String   @id @default(dbgenerated("gen_random_uuid()"))
+  key        String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  validUntil DateTime
+  isActive   Boolean  @default(true)
+}
+
+model UserModuleInteraction {
+  id            String     @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  moduleName    ModuleName
+  interactionAt DateTime   @default(now())
+}
+
+model UserAnalytics {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  event     String
+  eventTime DateTime @default(now())
+  details   Json
+}
+
+model Module {
+  id          String          @id @default(dbgenerated("gen_random_uuid()"))
+  name        ModuleName
+  description String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  features    ModuleFeature[]
+}
+
+model ModuleFeature {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()"))
+  moduleId           String
+  module             Module               @relation(fields: [moduleId], references: [id])
+  name               String
+  description        String
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  FeatureUsageRecord FeatureUsageRecord[]
+}
+
+model FeatureUsageRecord {
+  id           String        @id @default(dbgenerated("gen_random_uuid()"))
+  featureId    String
+  feature      ModuleFeature @relation(fields: [featureId], references: [id])
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  usedAt       DateTime      @default(now())
+  usageDetails Json
+}
+
+enum UserRole {
+  FreeUser
+  SubscribedUser
+  Admin
+}
+
+enum SubscriptionType {
+  Monthly
+  Yearly
+}
+
+enum ModuleName {
+  NaturalLanguageProcessing
+  RealTimeAnalytics
+  DataProtection
+  APIIntegrationSupport
+}
+

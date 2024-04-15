@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "test"
+version = "0.1.0"
+description = "The Multi-Purpose API Toolkit presents an amalgam of essential tools that can be crucial for a wide range of applications, particularly for projects that require a diverse yet unified API approach. The toolkit encompasses a variety of functionalities aimed at simplifying common development tasks and enhancing application capabilities without the need for integrating several third-party services. Key features identified as particularly valuable include the Natural Language Processing (NLP) module for its ability to transform unstructured data into actionable insights and to improve user interaction through advanced analytics and scalability."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+cryptography = "^38.0.1"
+fastapi = "*"
+google-cloud-translate = "^3.0.2"
+prisma = "*"
+pydantic = "*"
+spacy = "*"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
